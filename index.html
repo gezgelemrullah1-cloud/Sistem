@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çorlu Anadolu İmam Hatip Lisesi - Kelebek Sınav Dağıtım Programı</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #111827;
+            font-size: 14px;
+        }
+
+        /* Standart Kurumsal Tablo Tasarımı */
+        .std-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+        }
+        .std-table th {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            font-weight: 700;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            font-size: 12px;
+        }
+        .std-table td {
+            padding: 7px 10px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+            color: #111827;
+        }
+        .std-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .std-table tr:hover {
+            background-color: #eff6ff;
+        }
+
+        /* Form Elemanları */
+        .std-input {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1px solid #9ca3af;
+            border-radius: 4px;
+            background-color: #ffffff;
+            color: #111827;
+            font-size: 13px;
+        }
+        .std-input:focus {
+            outline: none;
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
+        }
+
+        .std-btn {
+            padding: 7px 14px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .std-btn-primary {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            border-color: #1e3a8a;
+        }
+        .std-btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .std-btn-success {
+            background-color: #15803d;
+            color: #ffffff;
+            border-color: #15803d;
+        }
+        .std-btn-success:hover {
+            background-color: #16a34a;
+        }
+        .std-btn-secondary {
+            background-color: #ffffff;
+            color: #1f2937;
+            border-color: #9ca3af;
+        }
+        .std-btn-secondary:hover {
+            background-color: #f3f4f6;
+        }
+        .std-btn-danger {
+            background-color: #b91c1c;
+            color: #ffffff;
+            border-color: #b91c1c;
+        }
+        .std-btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Masa / Sıra Kutusu */
+        .desk-box {
+            border: 1px solid #9ca3af;
+            background: #ffffff;
+            border-radius: 4px;
+            padding: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .desk-box:hover {
+            border-color: #1d4ed8;
+            background: #f8fafc;
+        }
+        .desk-box-selected {
+            border: 2px solid #d97706 !important;
+            background: #fef3c7 !important;
+        }
+
+        /* A4 Çıktı Sayfası */
+        .a4-sheet {
+            background: #ffffff;
+            color: #000000;
+            width: 100%;
+            max-width: 210mm;
+            min-height: 285mm;
+            margin: 0 auto 20px auto;
+            padding: 12mm 14mm;
+            border: 1px solid #9ca3af;
+            box-sizing: border-box;
+            page-break-after: always;
+            break-after: page;
+        }
+        .a4-sheet:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #printArea {
+                display: block !important;
+            }
+            .a4-sheet {
+                border: none !important;
+                margin: 0 !important;
+                padding: 8mm 10mm !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                page-break-after: always;
+                break-after: page;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ÜST KURUMSAL BAŞLIK ÇUBUĞU -->
+    <header class="no-print bg-[#1e293b] text-white border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-base sm:text-lg font-bold tracking-normal">
+                    ÇORLU ANADOLU İMAM HATİP LİSESİ — KELEBEK SINAV SİSTEMİ
+                </h1>
+                <p class="text-xs text-slate-300">
+                    Ortaokul (5-6-7-8) ve Lise (9-10-11-12) Sınıf / Sıra Tanımlama, Öğrenci Girişi ve Sınav Yerleştirme Programı
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <span id="activeConfigLabel" class="text-xs bg-slate-800 border border-slate-600 px-2.5 py-1.5 rounded text-slate-200">
+                    Aktif Kayıt: Kaydedilmedi
+                </span>
+                <button onclick="quickOverwriteActiveConfig()" class="std-btn bg-amber-600 hover:bg-amber-700 text-white text-xs py-1.5 px-3">
+                    Kaydın Üstüne Yaz
+                </button>
+                <button onclick="runButterflyDistribution()" class="std-btn std-btn-success text-xs py-1.5 px-3">
+                    Kelebek Dağıtımı Yap
+                </button>
+            </div>
+        </div>
+
+        <!-- SEKMELER (MENÜ) -->
+        <div class="bg-[#0f172a] border-t border-slate-700">
+            <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto">
+                <button id="nav-halls" onclick="switchTab('halls')" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap">
+                    1. Sınıf & Sıra Tanımlama (<span id="cntHalls">0</span>)
+                </button>
+                <button id="nav-students" onclick="switchTab('students')" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap">
+                    2. Öğrenci Girişi (<span id="cntStudents">0</span>)
+                </button>
+                <button id="nav-seating" onclick="switchTab('seating')" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap">
+                    3. Oturma Düzeni & Sıra Kontrol
+                </button>
+                <button id="nav-pdf" onclick="switchTab('pdf')" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap">
+                    4. PDF Çıktı & Yazdırma
+                </button>
+                <button id="nav-config" onclick="switchTab('config')" class="px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 whitespace-nowrap">
+                    5. Kayıt (Config) İşlemleri
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK -->
+    <main class="no-print flex-1 max-w-7xl w-full mx-auto px-4 py-4 space-y-4">
+
+        <!-- ÖZET BİLGİ ÇUBUĞU -->
+        <div class="bg-white border border-gray-300 rounded p-3 grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+            <div class="border-r border-gray-200 pr-2">
+                <span class="text-gray-500 block">Tanımlı Sınıf / Toplam Sıra:</span>
+                <strong id="sumHallsAndRows" class="text-sm text-gray-900">0 Sınıf / 0 Sıra</strong>
+            </div>
+            <div class="border-r border-gray-200 pr-2">
+                <span class="text-gray-500 block">Ortaokul Öğrenci (5-8):</span>
+                <strong id="sumOrtaokul" class="text-sm text-gray-900">0 (Kız: 0, Erkek: 0)</strong>
+            </div>
+            <div class="border-r border-gray-200 pr-2">
+                <span class="text-gray-500 block">Lise Öğrenci (9-12):</span>
+                <strong id="sumLise" class="text-sm text-gray-900">0 (Kız: 0, Erkek: 0)</strong>
+            </div>
+            <div class="border-r border-gray-200 pr-2">
+                <span class="text-gray-500 block">Kız / Erkek Sıra Kapasitesi:</span>
+                <strong id="sumGenderCap" class="text-sm text-gray-900">Kız: 0 / Erkek: 0</strong>
+            </div>
+            <div>
+                <span class="text-gray-500 block">Yerleşim Durumu:</span>
+                <strong id="sumPlaced" class="text-sm text-green-700">0 Yerleşti / 0 Açıkta</strong>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- SEKME 1: SINIF VE SIRA TANIMLAMA (TEK TEK GİRİŞ)          -->
+        <!-- ========================================================= -->
+        <section id="panel-halls" class="space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                <!-- Sol: Tek Tek Sınıf ve Sıra Ekleme Formu -->
+                <div class="lg:col-span-4 bg-white border border-gray-300 rounded p-4 h-fit space-y-3">
+                    <div class="border-b border-gray-200 pb-2 flex items-center justify-between">
+                        <h2 id="hallFormHeader" class="font-bold text-gray-800 text-sm">
+                            Sınıf / Sınav Salonu Ekle
+                        </h2>
+                        <button id="btnCancelHallEdit" onclick="resetHallForm()" class="hidden text-xs text-red-600 underline">
+                            Düzenlemeyi İptal Et
+                        </button>
+                    </div>
+
+                    <input type="hidden" id="editHallId" value="">
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">
+                            Sınıf / Salon Adı <span class="text-red-600">*</span>
+                        </label>
+                        <input id="inpHallName" type="text" placeholder="Örn: 9-A, 10-B, 6-A, Z-01"
+                            onkeydown="if(event.key==='Enter') saveHall()"
+                            class="std-input">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">
+                            Okul Kademesi (Ortaokul / Lise) <span class="text-red-600">*</span>
+                        </label>
+                        <select id="inpHallLevel" class="std-input">
+                            <option value="Lise">Lise (9, 10, 11, 12. Sınıflar)</option>
+                            <option value="Ortaokul">Ortaokul (5, 6, 7, 8. Sınıflar)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">
+                            Sınıf Cinsiyet Kuralı <span class="text-red-600">*</span>
+                        </label>
+                        <select id="inpHallGender" class="std-input">
+                            <option value="F">Tamamen Kız Sınıfı (Sadece Kızlar Oturur)</option>
+                            <option value="M">Tamamen Erkek Sınıfı (Sadece Erkekler Oturur)</option>
+                            <option value="ALL">Karma Sınıf (Kız ve Erkek Karışık)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">
+                                Bu Sınıfta Kaç Sıra Var? <span class="text-red-600">*</span>
+                            </label>
+                            <input id="inpHallRowCount" type="number" min="1" max="150" value="18"
+                                onkeydown="if(event.key==='Enter') saveHall()"
+                                class="std-input font-bold">
+                            <span class="text-[11px] text-gray-500">Örn: 15 sıra, 20 sıra</span>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">
+                                Yan Yana Kaç Grup (Sütun)?
+                            </label>
+                            <select id="inpHallCols" class="std-input">
+                                <option value="2">2 Grup (Cam / Kapı)</option>
+                                <option value="3" selected>3 Grup (Cam / Orta / Kapı)</option>
+                                <option value="4">4 Grup</option>
+                            </select>
+                            <span class="text-[11px] text-gray-500">Görsel şema için sütun</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-1">
+                        <button onclick="saveHall()" class="std-btn std-btn-primary w-full">
+                            <span id="btnSaveHallText">Sınıfı Listeye Ekle</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sağ: Eklenen Sınıflar Tablosu -->
+                <div class="lg:col-span-8 bg-white border border-gray-300 rounded p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                        <div>
+                            <h2 class="font-bold text-gray-800 text-sm">Eklenen Sınıflar ve Sıra Sayıları</h2>
+                            <p class="text-xs text-gray-500">Hangi sınıfta kaç sıra olduğunu buradan görebilir, sıra sayısını doğrudan değiştirebilirsiniz.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select id="filterHallLevel" onchange="renderHallsTable()" class="std-input !w-auto py-1 text-xs">
+                                <option value="ALL">Tüm Kademeler</option>
+                                <option value="Ortaokul">Sadece Ortaokul Sınıfları</option>
+                                <option value="Lise">Sadece Lise Sınıfları</option>
+                            </select>
+                            <button onclick="clearAllHalls()" class="std-btn std-btn-secondary text-xs py-1 px-2.5 text-red-700">
+                                Tüm Sınıfları Sil
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="std-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;">#</th>
+                                    <th>Sınıf / Salon Adı</th>
+                                    <th>Kademe</th>
+                                    <th>Kız / Erkek Durumu</th>
+                                    <th style="width: 150px;">Kaç Sıra Var? (Değiştir)</th>
+                                    <th>Grup Sayısı</th>
+                                    <th>Yerleşen</th>
+                                    <th style="width: 130px; text-align: right;">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyHalls">
+                                <!-- JS ile doldurulur -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEKME 2: ÖĞRENCİ GİRİŞİ (TEK TEK VEYA LİSTE İLE)          -->
+        <!-- ========================================================= -->
+        <section id="panel-students" class="hidden space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                <!-- Sol: Tek Tek Öğrenci Ekleme Formu -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-white border border-gray-300 rounded p-4 space-y-3">
+                        <div class="border-b border-gray-200 pb-2 flex items-center justify-between">
+                            <div>
+                                <h2 id="stuFormHeader" class="font-bold text-gray-800 text-sm">Tek Tek Öğrenci Ekle</h2>
+                                <p class="text-[11px] text-gray-500">Bilgileri yazıp <b>Enter</b> tuşuna basarak hızlıca alt alta ekleyebilirsiniz.</p>
+                            </div>
+                            <button id="btnCancelStuEdit" onclick="resetStudentForm()" class="hidden text-xs text-red-600 underline">
+                                İptal
+                            </button>
+                        </div>
+
+                        <input type="hidden" id="editStuId" value="">
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Okul No</label>
+                                <input id="inpStuNo" type="text" placeholder="Örn: 145"
+                                    onkeydown="if(event.key==='Enter') saveStudent()"
+                                    class="std-input">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Adı Soyadı <span class="text-red-600">*</span></label>
+                                <input id="inpStuName" type="text" placeholder="Örn: Ahmet Yılmaz"
+                                    onkeydown="if(event.key==='Enter') saveStudent()"
+                                    class="std-input">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Kendi Sınıfı / Şubesi <span class="text-red-600">*</span></label>
+                                <input id="inpStuClass" type="text" placeholder="Örn: 9/A veya 6/B" value="9/A"
+                                    oninput="autoSelectLevelFromClassInput()"
+                                    onkeydown="if(event.key==='Enter') saveStudent()"
+                                    class="std-input uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1">Kademe <span class="text-red-600">*</span></label>
+                                <select id="inpStuLevel" class="std-input">
+                                    <option value="Lise">Lise (9-12)</option>
+                                    <option value="Ortaokul">Ortaokul (5-8)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">Cinsiyeti <span class="text-red-600">*</span></label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center gap-2 border border-gray-300 rounded p-2 cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                    <input type="radio" name="stuGenderRadio" value="F" checked>
+                                    <span class="text-xs font-semibold text-gray-800">Kız Öğrenci</span>
+                                </label>
+                                <label class="flex items-center gap-2 border border-gray-300 rounded p-2 cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                    <input type="radio" name="stuGenderRadio" value="M">
+                                    <span class="text-xs font-semibold text-gray-800">Erkek Öğrenci</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button onclick="saveStudent()" class="std-btn std-btn-primary w-full">
+                            <span id="btnSaveStuText">Öğrenciyi Ekle (Enter)</span>
+                        </button>
+                    </div>
+
+                    <!-- İsteğe Bağlı: Çoklu Yapıştırma Alanı -->
+                    <details class="bg-white border border-gray-300 rounded p-3">
+                        <summary class="text-xs font-bold text-gray-700 cursor-pointer">
+                            + Toplu Liste Yapıştırarak Ekle (İsteğe Bağlı)
+                        </summary>
+                        <div class="mt-3 space-y-2 border-t border-gray-200 pt-2">
+                            <p class="text-[11px] text-gray-600">
+                                Alt alta her satıra bir öğrenci yazabilirsiniz. <br>
+                                Örnek: <code>105, Ali Kaya, 9/A, E</code> veya sadece isim yazıp aşağıdaki sınıfı seçin:
+                            </p>
+                            <div class="grid grid-cols-3 gap-1.5">
+                                <input id="bulkClassInp" type="text" value="9/A" placeholder="Sınıf (9/A)" class="std-input text-xs">
+                                <select id="bulkLevelInp" class="std-input text-xs">
+                                    <option value="Lise">Lise</option>
+                                    <option value="Ortaokul">Ortaokul</option>
+                                </select>
+                                <select id="bulkGenderInp" class="std-input text-xs">
+                                    <option value="F">Kız</option>
+                                    <option value="M">Erkek</option>
+                                </select>
+                            </div>
+                            <textarea id="bulkTextInp" rows="4" placeholder="101, Ayşe Demir&#10;102, Fatma Çelik" class="std-input text-xs font-mono"></textarea>
+                            <button onclick="addBulkStudents()" class="std-btn std-btn-secondary w-full text-xs">
+                                Listeyi Ekle
+                            </button>
+                        </div>
+                    </details>
+                </div>
+
+                <!-- Sağ: Eklenen Öğrenciler Tablosu -->
+                <div class="lg:col-span-8 bg-white border border-gray-300 rounded p-4 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 pb-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="font-bold text-gray-800 text-sm mr-2">Öğrenci Listesi</h2>
+                            <select id="filterStuLevel" onchange="renderStudentsTable()" class="std-input !w-auto py-1 text-xs">
+                                <option value="ALL">Tüm Kademeler</option>
+                                <option value="Ortaokul">Ortaokul (5-8)</option>
+                                <option value="Lise">Lise (9-12)</option>
+                            </select>
+                            <select id="filterStuGender" onchange="renderStudentsTable()" class="std-input !w-auto py-1 text-xs">
+                                <option value="ALL">Kız + Erkek</option>
+                                <option value="F">Sadece Kızlar</option>
+                                <option value="M">Sadece Erkekler</option>
+                            </select>
+                            <select id="filterStuClass" onchange="renderStudentsTable()" class="std-input !w-auto py-1 text-xs">
+                                <option value="ALL">Tüm Şubeler</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <input id="searchStuInp" type="text" oninput="renderStudentsTable()" placeholder="İsim veya No ara..." class="std-input !w-40 py-1 text-xs">
+                            <button onclick="clearAllStudents()" class="std-btn std-btn-secondary text-xs py-1 px-2.5 text-red-700">
+                                Tüm Öğrencileri Sil
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto max-h-[540px] overflow-y-auto">
+                        <table class="std-table">
+                            <thead class="sticky top-0">
+                                <tr>
+                                    <th style="width: 40px;">#</th>
+                                    <th style="width: 75px;">Okul No</th>
+                                    <th>Adı Soyadı</th>
+                                    <th>Kademe</th>
+                                    <th>Sınıfı</th>
+                                    <th>Cinsiyet</th>
+                                    <th>Atandığı Sınav Sınıfı & Sıra No</th>
+                                    <th style="width: 110px; text-align: right;">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyStudents">
+                                <!-- JS ile doldurulur -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEKME 3: OTURMA DÜZENİ & SIRA KONTROL                     -->
+        <!-- ========================================================= -->
+        <section id="panel-seating" class="hidden space-y-4">
+            <div class="bg-white border border-gray-300 rounded p-4 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-gray-800 text-sm">Kelebek Dağıtım ve Sıra Düzeni Kontrol Ekranı</h2>
+                    <p class="text-xs text-gray-600 mt-0.5">
+                        Ortaokullar kendi aralarında ortaokul sınıflarına, liseler kendi aralarında lise sınıflarına; kız ve erkek sınıf ayrımlarına göre dağıtılır.
+                        İki sıraya tıklayarak öğrencilerin yerini değiştirebilirsiniz.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="runButterflyDistribution()" class="std-btn std-btn-success">
+                        Şimdi Kelebek Dağıtımı Yap / Karıştır
+                    </button>
+                    <button onclick="switchTab('pdf')" class="std-btn std-btn-primary">
+                        PDF Çıktı Ekranına Geç
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kapasite / Açıkta Kalan Öğrenci Uyarısı -->
+            <div id="unplacedWarningBox" class="hidden bg-red-50 border border-red-400 text-red-900 rounded p-3 text-xs space-y-1"></div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <!-- Sol: Sınıf Seçimi -->
+                <div class="lg:col-span-3 bg-white border border-gray-300 rounded p-3 space-y-2 h-fit">
+                    <div class="font-bold text-xs text-gray-700 border-b border-gray-200 pb-1.5">
+                        SINAV SALONLARI (SINIF SEÇİN)
+                    </div>
+                    <div id="seatingHallList" class="space-y-1.5 max-h-[500px] overflow-y-auto">
+                        <!-- JS ile doldurulur -->
+                    </div>
+                </div>
+
+                <!-- Sağ: Seçili Sınıfın Sıra Düzeni (1. Sıra, 2. Sıra, 3. Sıra...) -->
+                <div class="lg:col-span-9 bg-white border border-gray-300 rounded p-4 space-y-4">
+                    <div id="seatingHallHeader" class="border-b border-gray-200 pb-2 flex flex-wrap items-center justify-between gap-2">
+                        <!-- JS ile doldurulur -->
+                    </div>
+
+                    <div class="bg-gray-100 border border-gray-300 text-center py-2 text-xs font-bold text-gray-700 rounded">
+                        YAZI TAHTASI / ÖĞRETMEN MASASI (ÖN TARAF — 1. SIRA BURADAN BAŞLAR)
+                    </div>
+
+                    <div id="seatingDesksGrid" class="grid gap-4">
+                        <!-- JS ile doldurulur -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEKME 4: PDF ÇIKTI & YAZDIRMA EKRANI                      -->
+        <!-- ========================================================= -->
+        <section id="panel-pdf" class="hidden space-y-4">
+            <div class="bg-white border border-gray-300 rounded p-4 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-3">
+                    <div>
+                        <h2 class="font-bold text-gray-800 text-sm">PDF Çıktı Alma ve Yazdırma Ekranı</h2>
+                        <p class="text-xs text-gray-600">
+                            Öğrencilerin hangi sınıfta ve kaçıncı sırada (Örn: 10-A Sınıfı - 3. Sıra) oturacağını gösteren listeleri PDF indirin veya yazdırın.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="btnDownloadPdf" onclick="exportToPdfFile()" class="std-btn std-btn-danger">
+                            PDF Olarak İndir (.pdf)
+                        </button>
+                        <button onclick="window.print()" class="std-btn std-btn-primary">
+                            Yazıcıdan Çıktı Al (Yazdır)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Sınav Adı / Başlık</label>
+                        <input id="pdfTitleInput" type="text" value="Ortak Sınav Kelebek Oturma Düzeni Listesi" oninput="renderPdfPreview()" class="std-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Sınav Tarihi / Saati</label>
+                        <input id="pdfDateInput" type="text" value="" placeholder="Örn: 25.10.2026 - 10:00" oninput="renderPdfPreview()" class="std-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Kademe Filtresi</label>
+                        <select id="pdfLevelFilter" onchange="renderPdfPreview()" class="std-input">
+                            <option value="ALL">Tüm Okul (Ortaokul + Lise)</option>
+                            <option value="Ortaokul">Sadece Ortaokul (5-8)</option>
+                            <option value="Lise">Sadece Lise (9-12)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                    <span class="text-xs font-bold text-gray-700">Çıktı Türü:</span>
+                    <button id="btnPdfMode-studentList" onclick="setPdfMode('studentList')" class="std-btn text-xs">
+                        1. Öğrenci Sınav Yeri Listesi (Şu Sınıf - 3. Sıra Listesi)
+                    </button>
+                    <button id="btnPdfMode-roomList" onclick="setPdfMode('roomList')" class="std-btn text-xs">
+                        2. Sınıf Kapı & Yoklama Listesi (1. Sıra, 2. Sıra, 3. Sıra...)
+                    </button>
+                    <button id="btnPdfMode-roomChart" onclick="setPdfMode('roomChart')" class="std-btn text-xs">
+                        3. Sınıf Görsel Sıra Şeması (Masa Planı)
+                    </button>
+                </div>
+            </div>
+
+            <!-- A4 Önizleme Alanı -->
+            <div class="bg-gray-300 border border-gray-400 rounded p-4 overflow-x-auto">
+                <div id="pdfPreviewRoot">
+                    <!-- JS ile A4 sayfaları oluşturulur -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SEKME 5: CONFIG (KAYDET / YÜKLE / ÜSTÜNE YAZ)             -->
+        <!-- ========================================================= -->
+        <section id="panel-config" class="hidden space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                <!-- Sol: Yeni Kayıt / Üstüne Yazma / Dosya İndir-Yükle -->
+                <div class="lg:col-span-5 bg-white border border-gray-300 rounded p-4 space-y-4 h-fit">
+                    <div class="border-b border-gray-200 pb-2">
+                        <h2 class="font-bold text-gray-800 text-sm">Config Kaydet / Üstüne Yaz</h2>
+                        <p class="text-xs text-gray-600 mt-0.5">
+                            Girdiğiniz sınıfları, sıra sayılarını ve öğrencileri kaydedebilir, daha sonra tekrar yükleyebilir veya üstüne yazabilirsiniz.
+                        </p>
+                    </div>
+
+                    <!-- Yeni Config Kaydet -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-semibold text-gray-700">Yeni Kayıt Adı</label>
+                        <div class="flex gap-2">
+                            <input id="inpNewConfigName" type="text" placeholder="Örn: 1. Dönem 1. Ortak Sınav" class="std-input">
+                            <button onclick="saveNewConfig()" class="std-btn std-btn-primary whitespace-nowrap">
+                                Yeni Kaydet
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Seçili Kaydın Üstüne Yaz -->
+                    <div class="p-3 bg-gray-50 border border-gray-300 rounded space-y-2">
+                        <label class="block text-xs font-bold text-gray-800">Mevcut Kaydın Üstüne Yaz</label>
+                        <p class="text-[11px] text-gray-600">
+                            Seçtiğiniz kaydın içindeki eski verileri silip şu anki sınıfları ve öğrencileri üstüne yazar:
+                        </p>
+                        <div class="flex gap-2">
+                            <select id="selOverwriteConfig" class="std-input"></select>
+                            <button onclick="overwriteSelectedConfig()" class="std-btn bg-amber-600 hover:bg-amber-700 text-white whitespace-nowrap">
+                                Üstüne Yaz
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bilgisayara Dosya Olarak İndir / Yükle -->
+                    <div class="border-t border-gray-200 pt-3 space-y-2">
+                        <label class="block text-xs font-bold text-gray-700">Bilgisayara Config Dosyası (.json) Yedekle</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="downloadConfigFile()" class="std-btn std-btn-secondary text-xs">
+                                Config Dosyası İndir (.json)
+                            </button>
+                            <label class="std-btn std-btn-secondary text-xs text-center cursor-pointer">
+                                Config Dosyası Yükle (.json)
+                                <input type="file" accept=".json" onchange="uploadConfigFile(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ: Kayıtlı Config Listesi -->
+                <div class="lg:col-span-7 bg-white border border-gray-300 rounded p-4 space-y-3">
+                    <div class="border-b border-gray-200 pb-2 flex items-center justify-between">
+                        <h2 class="font-bold text-gray-800 text-sm">Kayıtlı Config Listesi</h2>
+                        <button onclick="resetEverythingEmpty()" class="std-btn std-btn-secondary text-xs text-red-700 py-1 px-2.5">
+                            Sistemi Sıfırla (Tamamen Boşalt)
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="std-table">
+                            <thead>
+                                <tr>
+                                    <th>Kayıt Adı</th>
+                                    <th>Son Güncelleme</th>
+                                    <th>İçerik</th>
+                                    <th style="width: 220px; text-align: right;">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyConfigs">
+                                <!-- JS ile doldurulur -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- YAZDIRMA ALANI -->
+    <div id="printArea" class="hidden"></div>
+
+    <!-- ONAY PENCERESİ (MODAL) -->
+    <div id="confirmModal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4">
+        <div class="bg-white border border-gray-400 rounded max-w-md w-full p-5 shadow-lg space-y-4">
+            <h3 id="confirmTitle" class="font-bold text-gray-900 text-base border-b border-gray-200 pb-2">Onay</h3>
+            <p id="confirmText" class="text-sm text-gray-700"></p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeConfirmModal()" class="std-btn std-btn-secondary">Vazgeç</button>
+                <button id="btnConfirmYes" class="std-btn std-btn-primary">Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BİLDİRİM KUTUSU -->
+    <div id="statusNotice" class="no-print fixed bottom-4 right-4 z-50 hidden bg-slate-900 text-white px-4 py-2.5 rounded border border-slate-700 shadow text-xs font-semibold"></div>
+
+    <script>
+        /********************************************************************
+         * VERİ YAPISI (BAŞLANGIÇTA %100 BOŞ - KİMSE YOK)
+         ********************************************************************/
+        const STORAGE_ACTIVE_KEY = 'corlu_aihl_kelebek_clean_active_v2';
+        const STORAGE_CONFIGS_KEY = 'corlu_aihl_kelebek_clean_configs_v2';
+
+        let appState = {
+            activeConfigName: '',
+            examTitle: 'Ortak Sınav Kelebek Oturma Düzeni Listesi',
+            examDate: '',
+            halls: [],       // { id, name, level: 'Ortaokul'|'Lise', genderRule: 'F'|'M'|'ALL', rowCount: 18, colCount: 3 }
+            students: [],    // { id, no, name, className, level: 'Ortaokul'|'Lise', gender: 'F'|'M' }
+            assignments: {}, // { studentId: { hallId, rowNumber (1..N), colIndex, rowInCol } }
+            unplacedIds: []
+        };
+
+        let currentTab = 'halls';
+        let activeSeatingHallId = null;
+        let selectedSwapSeat = null; // { hallId, rowNumber }
+        let currentPdfMode = 'studentList';
+
+        window.onload = function () {
+            const saved = localStorage.getItem(STORAGE_ACTIVE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && Array.isArray(parsed.halls) && Array.isArray(parsed.students)) {
+                        appState = parsed;
+                    }
+                } catch (e) {}
+            }
+            switchTab('halls');
+            refreshUI();
+        };
+
+        function saveActiveToLocal() {
+            localStorage.setItem(STORAGE_ACTIVE_KEY, JSON.stringify(appState));
+        }
+
+        /********************************************************************
+         * SEKME GEÇİŞLERİ VE GENEL GÜNCELLEME
+         ********************************************************************/
+        function switchTab(tab) {
+            currentTab = tab;
+            const tabs = ['halls', 'students', 'seating', 'pdf', 'config'];
+            tabs.forEach(t => {
+                const panel = document.getElementById('panel-' + t);
+                const nav = document.getElementById('nav-' + t);
+                if (t === tab) {
+                    panel.classList.remove('hidden');
+                    nav.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 border-blue-400 text-white bg-slate-800 whitespace-nowrap';
+                } else {
+                    panel.classList.add('hidden');
+                    nav.className = 'px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-300 hover:text-white hover:bg-slate-800/50 whitespace-nowrap';
+                }
+            });
+
+            if (tab === 'seating') renderSeatingPanel();
+            if (tab === 'pdf') renderPdfPreview();
+            if (tab === 'config') renderConfigPanel();
+        }
+
+        function refreshUI() {
+            updateSummaryBar();
+            renderHallsTable();
+            updateStudentClassFilterOptions();
+            renderStudentsTable();
+            if (currentTab === 'seating') renderSeatingPanel();
+            if (currentTab === 'pdf') renderPdfPreview();
+            if (currentTab === 'config') renderConfigPanel();
+        }
+
+        function updateSummaryBar() {
+            const totalHalls = appState.halls.length;
+            const totalRows = appState.halls.reduce((acc, h) => acc + (parseInt(h.rowCount) || 0), 0);
+
+            const ortStu = appState.students.filter(s => s.level === 'Ortaokul');
+            const lisStu = appState.students.filter(s => s.level === 'Lise');
+
+            const ortF = ortStu.filter(s => s.gender === 'F').length;
+            const ortM = ortStu.filter(s => s.gender === 'M').length;
+            const lisF = lisStu.filter(s => s.gender === 'F').length;
+            const lisM = lisStu.filter(s => s.gender === 'M').length;
+
+            let capF = 0, capM = 0, capAll = 0;
+            appState.halls.forEach(h => {
+                const r = parseInt(h.rowCount) || 0;
+                if (h.genderRule === 'F') capF += r;
+                else if (h.genderRule === 'M') capM += r;
+                else capAll += r;
+            });
+
+            const placedCount = Object.keys(appState.assignments || {}).length;
+            const unplacedCount = Math.max(0, appState.students.length - placedCount);
+
+            document.getElementById('cntHalls').textContent = totalHalls;
+            document.getElementById('cntStudents').textContent = appState.students.length;
+
+            document.getElementById('sumHallsAndRows').textContent = `${totalHalls} Sınıf / ${totalRows} Sıra`;
+            document.getElementById('sumOrtaokul').textContent = `${ortStu.length} (Kız: ${ortF}, Erkek: ${ortM})`;
+            document.getElementById('sumLise').textContent = `${lisStu.length} (Kız: ${lisF}, Erkek: ${lisM})`;
+            document.getElementById('sumGenderCap').textContent = `Kız: ${capF} / Erkek: ${capM}${capAll > 0 ? ' / Karma: ' + capAll : ''}`;
+            document.getElementById('sumPlaced').textContent = `${placedCount} Yerleşti / ${unplacedCount} Açıkta`;
+            document.getElementById('sumPlaced').className = unplacedCount > 0 ? 'text-sm text-red-700 font-bold' : 'text-sm text-green-700 font-bold';
+
+            document.getElementById('activeConfigLabel').textContent = 'Aktif Kayıt: ' + (appState.activeConfigName || 'Kaydedilmedi');
+        }
+
+        /********************************************************************
+         * 1. SINIF VE SIRA TANIMLAMA İŞLEMLERİ
+         ********************************************************************/
+        function saveHall() {
+            const editId = document.getElementById('editHallId').value;
+            const name = document.getElementById('inpHallName').value.trim();
+            const level = document.getElementById('inpHallLevel').value;
+            const genderRule = document.getElementById('inpHallGender').value;
+            const rowCount = Math.max(1, parseInt(document.getElementById('inpHallRowCount').value) || 15);
+            const colCount = parseInt(document.getElementById('inpHallCols').value) || 3;
+
+            if (!name) {
+                showNotice('Lütfen sınıf / salon adını girin (Örn: 9-A, 6-B).');
+                document.getElementById('inpHallName').focus();
+                return;
+            }
+
+            if (editId) {
+                const idx = appState.halls.findIndex(h => h.id === editId);
+                if (idx !== -1) {
+                    appState.halls[idx] = {
+                        ...appState.halls[idx],
+                        name,
+                        level,
+                        genderRule,
+                        rowCount,
+                        colCount
+                    };
+                    showNotice(`"${name}" sınıfı güncellendi.`);
+                }
+            } else {
+                appState.halls.push({
+                    id: 'H_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    name,
+                    level,
+                    genderRule,
+                    rowCount,
+                    colCount
+                });
+                showNotice(`"${name}" (${rowCount} Sıra) eklendi.`);
+            }
+
+            resetHallForm();
+            runButterflyDistribution(true);
+            saveActiveToLocal();
+            refreshUI();
+            document.getElementById('inpHallName').focus();
+        }
+
+        function editHall(hallId) {
+            const h = appState.halls.find(x => x.id === hallId);
+            if (!h) return;
+            document.getElementById('editHallId').value = h.id;
+            document.getElementById('inpHallName').value = h.name;
+            document.getElementById('inpHallLevel').value = h.level;
+            document.getElementById('inpHallGender').value = h.genderRule;
+            document.getElementById('inpHallRowCount').value = h.rowCount;
+            document.getElementById('inpHallCols').value = String(h.colCount || 3);
+
+            document.getElementById('hallFormHeader').textContent = 'Sınıfı Düzenle: ' + h.name;
+            document.getElementById('btnSaveHallText').textContent = 'Değişiklikleri Kaydet';
+            document.getElementById('btnCancelHallEdit').classList.remove('hidden');
+        }
+
+        function resetHallForm() {
+            document.getElementById('editHallId').value = '';
+            document.getElementById('inpHallName').value = '';
+            document.getElementById('hallFormHeader').textContent = 'Sınıf / Sınav Salonu Ekle';
+            document.getElementById('btnSaveHallText').textContent = 'Sınıfı Listeye Ekle';
+            document.getElementById('btnCancelHallEdit').classList.add('hidden');
+        }
+
+        function updateHallRowCountInline(hallId, newCountVal) {
+            const h = appState.halls.find(x => x.id === hallId);
+            if (!h) return;
+            const parsed = Math.max(1, parseInt(newCountVal) || 1);
+            h.rowCount = parsed;
+            runButterflyDistribution(true);
+            saveActiveToLocal();
+            refreshUI();
+            showNotice(`"${h.name}" sıra sayısı ${parsed} olarak güncellendi.`);
+        }
+
+        function deleteHall(hallId) {
+            appState.halls = appState.halls.filter(h => h.id !== hallId);
+            runButterflyDistribution(true);
+            saveActiveToLocal();
+            refreshUI();
+            showNotice('Sınıf silindi.');
+        }
+
+        function clearAllHalls() {
+            if (appState.halls.length === 0) return;
+            openConfirmModal('Tüm Sınıfları Sil', 'Eklediğiniz tüm sınıfları silmek istediğinize emin misiniz?', () => {
+                appState.halls = [];
+                appState.assignments = {};
+                saveActiveToLocal();
+                refreshUI();
+                showNotice('Tüm sınıflar silindi.');
+            });
+        }
+
+        function renderHallsTable() {
+            const tbody = document.getElementById('tbodyHalls');
+            const filterLv = document.getElementById('filterHallLevel').value;
+            const list = appState.halls.filter(h => filterLv === 'ALL' || h.level === filterLv);
+
+            if (list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-gray-500">
+                            Henüz hiç sınıf eklenmedi. Sol taraftaki formdan sınıf adını ve kaç sıra olduğunu girerek tek tek ekleyebilirsiniz.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const placedCounts = {};
+            Object.values(appState.assignments || {}).forEach(a => {
+                placedCounts[a.hallId] = (placedCounts[a.hallId] || 0) + 1;
+            });
+
+            tbody.innerHTML = list.map((h, idx) => {
+                const genderText = h.genderRule === 'F'
+                    ? '<span class="text-pink-800 bg-pink-100 border border-pink-300 px-2 py-0.5 rounded text-xs font-semibold">Tamamen Kız Sınıfı</span>'
+                    : (h.genderRule === 'M'
+                        ? '<span class="text-blue-800 bg-blue-100 border border-blue-300 px-2 py-0.5 rounded text-xs font-semibold">Tamamen Erkek Sınıfı</span>'
+                        : '<span class="text-gray-800 bg-gray-200 border border-gray-300 px-2 py-0.5 rounded text-xs font-semibold">Karma Sınıf</span>');
+
+                const occ = placedCounts[h.id] || 0;
+
+                return `
+                    <tr>
+                        <td class="font-mono text-xs text-gray-500">${idx + 1}</td>
+                        <td class="font-bold">${escapeHtml(h.name)}</td>
+                        <td>
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold ${h.level === 'Ortaokul' ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-200 text-slate-900 border border-slate-400'}">
+                                ${h.level}
+                            </span>
+                        </td>
+                        <td>${genderText}</td>
+                        <td>
+                            <div class="flex items-center gap-1.5">
+                                <input type="number" min="1" max="150" value="${h.rowCount}"
+                                    onchange="updateHallRowCountInline('${h.id}', this.value)"
+                                    class="std-input !w-20 !py-1 font-bold text-center">
+                                <span class="text-xs text-gray-600 font-semibold">Sıra</span>
+                            </div>
+                        </td>
+                        <td class="text-xs text-gray-700">${h.colCount || 3} Grup</td>
+                        <td class="font-semibold ${occ > 0 ? 'text-green-700' : 'text-gray-500'}">${occ} / ${h.rowCount}</td>
+                        <td class="text-right space-x-1">
+                            <button onclick="editHall('${h.id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded text-gray-800">
+                                Düzenle
+                            </button>
+                            <button onclick="deleteHall('${h.id}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 border border-red-300 rounded text-red-700">
+                                Sil
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /********************************************************************
+         * 2. ÖĞRENCİ GİRİŞİ (TEK TEK VE TOPLU)
+         ********************************************************************/
+        function autoSelectLevelFromClassInput() {
+            const val = document.getElementById('inpStuClass').value.trim();
+            const m = val.match(/^(\d+)/);
+            if (m) {
+                const grade = parseInt(m[1]);
+                if (grade >= 5 && grade <= 8) {
+                    document.getElementById('inpStuLevel').value = 'Ortaokul';
+                } else if (grade >= 9 && grade <= 12) {
+                    document.getElementById('inpStuLevel').value = 'Lise';
+                }
+            }
+        }
+
+        function saveStudent() {
+            const editId = document.getElementById('editStuId').value;
+            const no = document.getElementById('inpStuNo').value.trim() || '-';
+            const name = document.getElementById('inpStuName').value.trim();
+            const className = (document.getElementById('inpStuClass').value.trim() || '9/A').toUpperCase();
+            const level = document.getElementById('inpStuLevel').value;
+            const genderRadio = document.querySelector('input[name="stuGenderRadio"]:checked');
+            const gender = genderRadio ? genderRadio.value : 'F';
+
+            if (!name) {
+                showNotice('Lütfen öğrencinin Ad Soyad bilgisini girin.');
+                document.getElementById('inpStuName').focus();
+                return;
+            }
+
+            if (editId) {
+                const idx = appState.students.findIndex(s => s.id === editId);
+                if (idx !== -1) {
+                    appState.students[idx] = {
+                        ...appState.students[idx],
+                        no,
+                        name,
+                        className,
+                        level,
+                        gender
+                    };
+                    showNotice(`"${name}" bilgileri güncellendi.`);
+                }
+                resetStudentForm();
+            } else {
+                appState.students.push({
+                    id: 'S_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    no,
+                    name,
+                    className,
+                    level,
+                    gender
+                });
+                // Hızlı tek tek giriş için sadece No ve İsim alanını temizle, Sınıf ve Cinsiyet sabit kalsın
+                document.getElementById('inpStuNo').value = '';
+                document.getElementById('inpStuName').value = '';
+                document.getElementById('inpStuNo').focus();
+                showNotice(`"${name}" (${className}) eklendi.`);
+            }
+
+            runButterflyDistribution(true);
+            saveActiveToLocal();
+            refreshUI();
+        }
+
+        function editStudent(stuId) {
+            const s = appState.students.find(x => x.id === stuId);
+            if (!s) return;
+            document.getElementById('editStuId').value = s.id;
+            document.getElementById('inpStuNo').value = s.no === '-' ? '' : s.no;
+            document.getElementById('inpStuName').value = s.name;
+            document.getElementById('inpStuClass').value = s.className;
+            document.getElementById('inpStuLevel').value = s.level;
+
+            const radios = document.querySelectorAll('input[name="stuGenderRadio"]');
+            radios.forEach(r => { r.checked = (r.value === s.gender); });
+
+            document.getElementById('stuFormHeader').textContent = 'Öğrenciyi Düzenle';
+            document.getElementById('btnSaveStuText').textContent = 'Öğrenciyi Güncelle';
+            document.getElementById('btnCancelStuEdit').classList.remove('hidden');
+        }
+
+        function resetStudentForm() {
+            document.getElementById('editStuId').value = '';
+            document.getElementById('inpStuNo').value = '';
+            document.getElementById('inpStuName').value = '';
+            document.getElementById('stuFormHeader').textContent = 'Tek Tek Öğrenci Ekle';
+            document.getElementById('btnSaveStuText').textContent = 'Öğrenciyi Ekle (Enter)';
+            document.getElementById('btnCancelStuEdit').classList.add('hidden');
+        }
+
+        function deleteStudent(stuId) {
+            appState.students = appState.students.filter(s => s.id !== stuId);
+            delete appState.assignments[stuId];
+            saveActiveToLocal();
+            refreshUI();
+        }
+
+        function clearAllStudents() {
+            if (appState.students.length === 0) return;
+            openConfirmModal('Tüm Öğrencileri Sil', 'Listedeki tüm öğrencileri silmek istediğinize emin misiniz?', () => {
+                appState.students = [];
+                appState.assignments = {};
+                appState.unplacedIds = [];
+                saveActiveToLocal();
+                refreshUI();
+                showNotice('Tüm öğrenciler silindi.');
+            });
+        }
+
+        function addBulkStudents() {
+            const raw = document.getElementById('bulkTextInp').value.trim();
+            if (!raw) {
+                showNotice('Lütfen eklenecek öğrencileri kutuya yazın.');
+                return;
+            }
+            const defClass = (document.getElementById('bulkClassInp').value.trim() || '9/A').toUpperCase();
+            const defLevel = document.getElementById('bulkLevelInp').value;
+            const defGender = document.getElementById('bulkGenderInp').value;
+
+            const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            let count = 0;
+
+            lines.forEach((line, idx) => {
+                const parts = line.split(/[,;\t]+/).map(p => p.trim()).filter(Boolean);
+                let no = '-', name = '', className = defClass, level = defLevel, gender = defGender;
+
+                if (parts.length >= 2) {
+                    no = parts[0];
+                    name = parts[1];
+                    if (parts[2]) {
+                        className = parts[2].toUpperCase();
+                        const m = className.match(/^(\d+)/);
+                        if (m) {
+                            const g = parseInt(m[1]);
+                            level = (g >= 5 && g <= 8) ? 'Ortaokul' : 'Lise';
+                        }
+                    }
+                    if (parts[3]) {
+                        const c = parts[3].toUpperCase().charAt(0);
+                        gender = (c === 'E' || c === 'M') ? 'M' : 'F';
+                    }
+                } else {
+                    name = line;
+                }
+
+                appState.students.push({
+                    id: 'S_' + Date.now() + '_' + idx + '_' + Math.floor(Math.random() * 999),
+                    no,
+                    name,
+                    className,
+                    level,
+                    gender
+                });
+                count++;
+            });
+
+            document.getElementById('bulkTextInp').value = '';
+            runButterflyDistribution(true);
+            saveActiveToLocal();
+            refreshUI();
+            showNotice(`${count} öğrenci eklendi.`);
+        }
+
+        function updateStudentClassFilterOptions() {
+            const sel = document.getElementById('filterStuClass');
+            const prev = sel.value;
+            const classes = Array.from(new Set(appState.students.map(s => s.className))).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
+            sel.innerHTML = `<option value="ALL">Tüm Şubeler (${classes.length})</option>` +
+                classes.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            if (classes.includes(prev)) sel.value = prev;
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('tbodyStudents');
+            const lvFilter = document.getElementById('filterStuLevel').value;
+            const genFilter = document.getElementById('filterStuGender').value;
+            const clsFilter = document.getElementById('filterStuClass').value;
+            const q = document.getElementById('searchStuInp').value.trim().toLowerCase();
+
+            const filtered = appState.students.filter(s => {
+                if (lvFilter !== 'ALL' && s.level !== lvFilter) return false;
+                if (genFilter !== 'ALL' && s.gender !== genFilter) return false;
+                if (clsFilter !== 'ALL' && s.className !== clsFilter) return false;
+                if (q && !(`${s.no} ${s.name} ${s.className}`.toLowerCase().includes(q))) return false;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center py-8 text-gray-500">
+                            Kayıtlı öğrenci bulunmuyor. Sol taraftaki formdan tek tek öğrenci ekleyebilirsiniz.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, idx) => {
+                const asg = appState.assignments ? appState.assignments[s.id] : null;
+                const hall = asg ? appState.halls.find(h => h.id === asg.hallId) : null;
+
+                const placeText = (asg && hall)
+                    ? `<strong class="text-blue-900">${escapeHtml(hall.name)}</strong> — <strong class="text-green-800">${asg.rowNumber}. Sıra</strong>`
+                    : `<span class="text-red-600 font-semibold">Sınıf / Sıra Atanmadı</span>`;
+
+                return `
+                    <tr>
+                        <td class="text-xs text-gray-500 font-mono">${idx + 1}</td>
+                        <td class="font-mono font-semibold">${escapeHtml(s.no)}</td>
+                        <td class="font-bold">${escapeHtml(s.name)}</td>
+                        <td>${s.level}</td>
+                        <td class="font-semibold">${escapeHtml(s.className)}</td>
+                        <td>${s.gender === 'F' ? 'Kız' : 'Erkek'}</td>
+                        <td>${placeText}</td>
+                        <td class="text-right space-x-1">
+                            <button onclick="editStudent('${s.id}')" class="px-2 py-0.5 text-xs bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded">
+                                Düzenle
+                            </button>
+                            <button onclick="deleteStudent('${s.id}')" class="px-2 py-0.5 text-xs bg-red-50 hover:bg-red-100 border border-red-300 rounded text-red-700">
+                                Sil
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        /********************************************************************
+         * 3. KELEBEK DAĞITIM ALGORİTMASI
+         * - Ortaokul kendi arasında, Lise kendi arasında
+         * - Kızlar Kız sınıflarına, Erkekler Erkek sınıflarına (veya Karma)
+         * - Aynı şubeden olanlar arka arkaya gelmeyecek şekilde karıştırılır
+         ********************************************************************/
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function runButterflyDistribution(silent = false) {
+            const newAssignments = {};
+            const unplacedIds = [];
+
+            ['Ortaokul', 'Lise'].forEach(level => {
+                const levelHalls = appState.halls.filter(h => h.level === level);
+                const levelStudents = appState.students.filter(s => s.level === level);
+
+                let slotsF = [];
+                let slotsM = [];
+                let slotsAll = [];
+
+                levelHalls.forEach(hall => {
+                    const colCount = parseInt(hall.colCount) || 3;
+                    const rowCount = parseInt(hall.rowCount) || 0;
+                    const hallSlots = [];
+                    for (let r = 1; r <= rowCount; r++) {
+                        const rowInCol = Math.ceil(r / colCount);
+                        const colIndex = ((r - 1) % colCount) + 1;
+                        hallSlots.push({
+                            key: `${hall.id}_R${r}`,
+                            hallId: hall.id,
+                            rowNumber: r, // 1. Sıra, 2. Sıra ... N. Sıra
+                            rowInCol,
+                            colIndex
+                        });
+                    }
+
+                    if (hall.genderRule === 'F') slotsF.push(hallSlots);
+                    else if (hall.genderRule === 'M') slotsM.push(hallSlots);
+                    else slotsAll.push(hallSlots);
+                });
+
+                const interleavedF = interleaveHallSlotArrays(slotsF);
+                const interleavedM = interleaveHallSlotArrays(slotsM);
+                const interleavedAll = interleaveHallSlotArrays(slotsAll);
+
+                const girls = shuffle(levelStudents.filter(s => s.gender === 'F'));
+                const boys = shuffle(levelStudents.filter(s => s.gender === 'M'));
+
+                const usedKarmaKeys = new Set();
+
+                // Kızları önce Kız sınıflarına, yer kalmazsa Karma sınıflara dağıt
+                distributeGroup(girls, [...interleavedF, ...interleavedAll], newAssignments, unplacedIds, usedKarmaKeys);
+
+                // Erkekleri önce Erkek sınıflarına, yer kalmazsa kalan Karma sınıflara dağıt
+                const freeKarma = interleavedAll.filter(s => !usedKarmaKeys.has(s.key));
+                distributeGroup(boys, [...interleavedM, ...freeKarma], newAssignments, unplacedIds, usedKarmaKeys);
+            });
+
+            appState.assignments = newAssignments;
+            appState.unplacedIds = unplacedIds;
+
+            saveActiveToLocal();
+            refreshUI();
+
+            if (!silent) {
+                if (appState.students.length === 0) {
+                    showNotice('Henüz öğrenci eklenmedi.');
+                } else if (unplacedIds.length === 0) {
+                    showNotice('Kelebek oturma düzeni oluşturuldu! Tüm öğrenciler sıralara yerleştirildi.');
+                } else {
+                    showNotice(`Dağıtım yapıldı ancak sıra sayısı yetmediği için ${unplacedIds.length} öğrenci açıkta kaldı!`);
+                }
+            }
+        }
+
+        function interleaveHallSlotArrays(hallSlotArrays) {
+            const result = [];
+            let maxLen = 0;
+            hallSlotArrays.forEach(a => { if (a.length > maxLen) maxLen = a.length; });
+            for (let i = 0; i < maxLen; i++) {
+                const shuffledHalls = shuffle(hallSlotArrays);
+                shuffledHalls.forEach(arr => {
+                    if (i < arr.length) result.push(arr[i]);
+                });
+            }
+            return result;
+        }
+
+        function distributeGroup(students, slots, assignments, unplacedIds, usedKeys) {
+            if (students.length === 0) return;
+
+            // Şubelere göre grupla ki aynı sınıftan öğrenciler peş peşe gelmesin
+            const byClass = {};
+            students.forEach(s => {
+                if (!byClass[s.className]) byClass[s.className] = [];
+                byClass[s.className].push(s);
+            });
+
+            const mixedQueue = [];
+            const classKeys = Object.keys(byClass);
+            while (mixedQueue.length < students.length) {
+                classKeys.sort((a, b) => byClass[b].length - byClass[a].length);
+                let picked = false;
+                for (const ck of classKeys) {
+                    if (byClass[ck].length > 0) {
+                        mixedQueue.push(byClass[ck].pop());
+                        picked = true;
+                    }
+                }
+                if (!picked) break;
+            }
+
+            let idx = 0;
+            mixedQueue.forEach(stu => {
+                if (idx >= slots.length) {
+                    unplacedIds.push(stu.id);
+                    return;
+                }
+                const slot = slots[idx++];
+                assignments[stu.id] = {
+                    hallId: slot.hallId,
+                    rowNumber: slot.rowNumber,
+                    rowInCol: slot.rowInCol,
+                    colIndex: slot.colIndex
+                };
+                usedKeys.add(slot.key);
+            });
+        }
+
+        /********************************************************************
+         * 3. SEKME: GÖRSEL SIRA KONTROL VE EL İLE YER DEĞİŞTİRME
+         ********************************************************************/
+        function renderSeatingPanel() {
+            const warnBox = document.getElementById('unplacedWarningBox');
+            const unplaced = appState.students.filter(s => !appState.assignments[s.id]);
+
+            if (unplaced.length > 0) {
+                warnBox.classList.remove('hidden');
+                warnBox.innerHTML = `
+                    <div class="font-bold">DİKKAT: Sıra Kapasitesi Yetmediği İçin ${unplaced.length} Öğrenci Yerleşemedi!</div>
+                    <div>Lütfen "1. Sınıf & Sıra Tanımlama" sekmesinden uygun kademe (Ortaokul/Lise) ve cinsiyet (Kız/Erkek) için yeni sınıf ekleyin veya mevcut sınıfların sıra sayısını artırın.</div>
+                    <div class="text-xs mt-1">Açıkta Kalanlar: ${unplaced.map(s => `${escapeHtml(s.name)} (${s.className} - ${s.level} - ${s.gender === 'F' ? 'Kız' : 'Erkek'})`).join(', ')}</div>
+                `;
+            } else {
+                warnBox.classList.add('hidden');
+            }
+
+            if (!activeSeatingHallId || !appState.halls.some(h => h.id === activeSeatingHallId)) {
+                activeSeatingHallId = appState.halls[0] ? appState.halls[0].id : null;
+            }
+
+            const listEl = document.getElementById('seatingHallList');
+            if (appState.halls.length === 0) {
+                listEl.innerHTML = `<div class="text-xs text-gray-500 py-4">Henüz sınıf tanımlanmadı.</div>`;
+                document.getElementById('seatingHallHeader').innerHTML = `<span class="text-xs text-gray-500">Sınıf seçilmedi.</span>`;
+                document.getElementById('seatingDesksGrid').innerHTML = '';
+                return;
+            }
+
+            const placedCounts = {};
+            Object.values(appState.assignments || {}).forEach(a => {
+                placedCounts[a.hallId] = (placedCounts[a.hallId] || 0) + 1;
+            });
+
+            listEl.innerHTML = appState.halls.map(h => {
+                const isSel = h.id === activeSeatingHallId;
+                const occ = placedCounts[h.id] || 0;
+                const gTxt = h.genderRule === 'F' ? 'Kız' : (h.genderRule === 'M' ? 'Erkek' : 'Karma');
+                return `
+                    <button onclick="selectSeatingHall('${h.id}')"
+                        class="w-full text-left px-3 py-2 rounded border text-xs flex items-center justify-between ${isSel ? 'bg-blue-900 text-white border-blue-900 font-bold' : 'bg-gray-50 hover:bg-gray-100 text-gray-800 border-gray-300'}">
+                        <div>
+                            <div>${escapeHtml(h.name)}</div>
+                            <div class="text-[11px] ${isSel ? 'text-blue-200' : 'text-gray-500'}">${h.level} • ${gTxt}</div>
+                        </div>
+                        <span class="font-mono text-xs px-1.5 py-0.5 rounded ${isSel ? 'bg-blue-950 text-white' : 'bg-gray-200 text-gray-800'}">
+                            ${occ}/${h.rowCount}
+                        </span>
+                    </button>
+                `;
+            }).join('');
+
+            renderSelectedHallDesks();
+        }
+
+        function selectSeatingHall(hallId) {
+            activeSeatingHallId = hallId;
+            selectedSwapSeat = null;
+            renderSeatingPanel();
+        }
+
+        function renderSelectedHallDesks() {
+            const hall = appState.halls.find(h => h.id === activeSeatingHallId);
+            const hdr = document.getElementById('seatingHallHeader');
+            const grid = document.getElementById('seatingDesksGrid');
+            if (!hall) return;
+
+            const occupantByRow = {};
+            appState.students.forEach(s => {
+                const asg = appState.assignments[s.id];
+                if (asg && asg.hallId === hall.id) {
+                    occupantByRow[asg.rowNumber] = s;
+                }
+            });
+
+            const gTxt = hall.genderRule === 'F' ? 'Tamamen Kız Sınıfı' : (hall.genderRule === 'M' ? 'Tamamen Erkek Sınıfı' : 'Karma Sınıf');
+            hdr.innerHTML = `
+                <div>
+                    <span class="font-bold text-base text-gray-900">${escapeHtml(hall.name)}</span>
+                    <span class="ml-2 text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-800 font-semibold">${hall.level}</span>
+                    <span class="ml-1 text-xs px-2 py-0.5 rounded bg-gray-200 text-gray-800 font-semibold">${gTxt}</span>
+                </div>
+                <div class="text-xs text-gray-600">
+                    Toplam <b>${hall.rowCount} Sıra</b> (${hall.colCount || 3} Grup)
+                </div>
+            `;
+
+            const colCount = parseInt(hall.colCount) || 3;
+            const totalRows = parseInt(hall.rowCount) || 1;
+            const rowsPerCol = Math.ceil(totalRows / colCount);
+
+            grid.style.gridTemplateColumns = `repeat(${colCount}, minmax(0, 1fr))`;
+
+            let html = '';
+            for (let col = 1; col <= colCount; col++) {
+                let colBoxes = '';
+                for (let r = 1; r <= rowsPerCol; r++) {
+                    const deskNo = (r - 1) * colCount + col;
+                    if (deskNo > totalRows) continue;
+
+                    const stu = occupantByRow[deskNo];
+                    const isSelected = selectedSwapSeat && selectedSwapSeat.hallId === hall.id && selectedSwapSeat.rowNumber === deskNo;
+
+                    if (stu) {
+                        colBoxes += `
+                            <div onclick="onSeatBoxClick('${hall.id}', ${deskNo})" class="desk-box ${isSelected ? 'desk-box-selected' : ''}">
+                                <div class="flex items-center justify-between text-xs border-b border-gray-200 pb-1 mb-1">
+                                    <strong class="text-blue-900">${deskNo}. SIRA</strong>
+                                    <span class="font-mono font-bold bg-gray-200 px-1.5 py-0.2 rounded text-[11px]">${escapeHtml(stu.className)}</span>
+                                </div>
+                                <div class="font-bold text-xs text-gray-900 truncate">${escapeHtml(stu.name)}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">Okul No: ${escapeHtml(stu.no)} (${stu.gender === 'F' ? 'Kız' : 'Erkek'})</div>
+                            </div>
+                        `;
+                    } else {
+                        colBoxes += `
+                            <div onclick="onSeatBoxClick('${hall.id}', ${deskNo})" class="desk-box border-dashed bg-gray-50 ${isSelected ? 'desk-box-selected' : ''}">
+                                <div class="flex items-center justify-between text-xs border-b border-gray-200 pb-1 mb-1">
+                                    <strong class="text-gray-600">${deskNo}. SIRA</strong>
+                                    <span class="text-[11px] text-gray-400">BOŞ</span>
+                                </div>
+                                <div class="text-xs text-gray-400 py-2 text-center">Boş Sıra</div>
+                            </div>
+                        `;
+                    }
+                }
+
+                html += `
+                    <div class="space-y-2">
+                        <div class="bg-gray-200 text-gray-800 text-center py-1 text-xs font-bold rounded">
+                            ${col}. GRUP
+                        </div>
+                        <div class="space-y-2">
+                            ${colBoxes}
+                        </div>
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function onSeatBoxClick(hallId, rowNumber) {
+            if (!selectedSwapSeat) {
+                selectedSwapSeat = { hallId, rowNumber };
+                renderSelectedHallDesks();
+                return;
+            }
+
+            if (selectedSwapSeat.hallId === hallId && selectedSwapSeat.rowNumber === rowNumber) {
+                selectedSwapSeat = null;
+                renderSelectedHallDesks();
+                return;
+            }
+
+            const slotA = selectedSwapSeat;
+            const slotB = { hallId, rowNumber };
+
+            let stuA = null, stuB = null;
+            Object.entries(appState.assignments).forEach(([sId, asg]) => {
+                if (asg.hallId === slotA.hallId && asg.rowNumber === slotA.rowNumber) stuA = sId;
+                if (asg.hallId === slotB.hallId && asg.rowNumber === slotB.rowNumber) stuB = sId;
+            });
+
+            const hallA = appState.halls.find(h => h.id === slotA.hallId);
+            const hallB = appState.halls.find(h => h.id === slotB.hallId);
+            const colCountA = hallA ? (parseInt(hallA.colCount) || 3) : 3;
+            const colCountB = hallB ? (parseInt(hallB.colCount) || 3) : 3;
+
+            if (stuA) {
+                appState.assignments[stuA] = {
+                    hallId: slotB.hallId,
+                    rowNumber: slotB.rowNumber,
+                    rowInCol: Math.ceil(slotB.rowNumber / colCountB),
+                    colIndex: ((slotB.rowNumber - 1) % colCountB) + 1
+                };
+            }
+            if (stuB) {
+                appState.assignments[stuB] = {
+                    hallId: slotA.hallId,
+                    rowNumber: slotA.rowNumber,
+                    rowInCol: Math.ceil(slotA.rowNumber / colCountA),
+                    colIndex: ((slotA.rowNumber - 1) % colCountA) + 1
+                };
+            }
+
+            selectedSwapSeat = null;
+            saveActiveToLocal();
+            refreshUI();
+            showNotice('Seçilen iki sıradaki öğrencilerin yeri değiştirildi.');
+        }
+
+        /********************************************************************
+         * 4. SEKME: PDF ÇIKTI VE YAZDIRMA EKRANI
+         ********************************************************************/
+        function setPdfMode(mode) {
+            currentPdfMode = mode;
+            renderPdfPreview();
+        }
+
+        function renderPdfPreview() {
+            ['studentList', 'roomList', 'roomChart'].forEach(m => {
+                const btn = document.getElementById('btnPdfMode-' + m);
+                if (btn) {
+                    btn.className = (m === currentPdfMode) ? 'std-btn std-btn-primary text-xs' : 'std-btn std-btn-secondary text-xs';
+                }
+            });
+
+            const title = document.getElementById('pdfTitleInput').value || 'Ortak Sınav Kelebek Oturma Düzeni';
+            const dateStr = document.getElementById('pdfDateInput').value || '';
+            const lvFilter = document.getElementById('pdfLevelFilter').value;
+
+            let pagesHtml = '';
+            if (currentPdfMode === 'studentList') {
+                pagesHtml = generatePdfStudentListPages(title, dateStr, lvFilter);
+            } else if (currentPdfMode === 'roomList') {
+                pagesHtml = generatePdfRoomDoorPages(title, dateStr, lvFilter);
+            } else {
+                pagesHtml = generatePdfRoomChartPages(title, dateStr, lvFilter);
+            }
+
+            document.getElementById('pdfPreviewRoot').innerHTML = pagesHtml;
+            document.getElementById('printArea').innerHTML = pagesHtml;
+        }
+
+        function buildPrintHeader(title, dateStr, rightLabel) {
+            return `
+                <div style="border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 800;">ÇORLU ANADOLU İMAM HATİP LİSESİ MÜDÜRLÜĞÜ</div>
+                        <div style="font-size: 12px; font-weight: 600; margin-top: 2px;">${escapeHtml(title)}</div>
+                    </div>
+                    <div style="text-align: right; font-size: 11px;">
+                        <div style="font-weight: 700;">${escapeHtml(rightLabel)}</div>
+                        ${dateStr ? `<div>Tarih: ${escapeHtml(dateStr)}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ÇIKTI 1: KİŞİLERİN OTURMA DÜZENİ LİSTESİ ("Şu Sınıf - 3. Sıra" şeklinde)
+        function generatePdfStudentListPages(title, dateStr, lvFilter) {
+            const students = appState.students.filter(s => lvFilter === 'ALL' || s.level === lvFilter);
+            if (students.length === 0) {
+                return `<div class="a4-sheet"><p>Henüz öğrenci eklenmedi.</p></div>`;
+            }
+
+            // Şubelere göre gruplayarak her şubeyi düzenli listele
+            const classes = Array.from(new Set(students.map(s => s.className))).sort((a, b) => a.localeCompare(b, 'tr', { numeric: true }));
+
+            return classes.map(cls => {
+                const clsStudents = students
+                    .filter(s => s.className === cls)
+                    .sort((a, b) => String(a.no).localeCompare(String(b.no), 'tr', { numeric: true }));
+
+                const lv = clsStudents[0] ? clsStudents[0].level : '';
+
+                const rows = clsStudents.map((s, idx) => {
+                    const asg = appState.assignments[s.id];
+                    const hall = asg ? appState.halls.find(h => h.id === asg.hallId) : null;
+                    const seatStr = (asg && hall)
+                        ? `<strong>${escapeHtml(hall.name)}</strong> — <strong>${asg.rowNumber}. Sıra</strong> (${asg.colIndex}. Grup)`
+                        : 'YERLEŞMEDİ';
+
+                    return `
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 11px;">${idx + 1}</td>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 11px; font-weight: 700;">${escapeHtml(s.no)}</td>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 11px; font-weight: 700;">${escapeHtml(s.name)}</td>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 11px;">${escapeHtml(s.className)}</td>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 11px;">${s.gender === 'F' ? 'Kız' : 'Erkek'}</td>
+                            <td style="border: 1px solid #000; padding: 5px 7px; font-size: 12px;">${seatStr}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="a4-sheet">
+                        ${buildPrintHeader(title, dateStr, `${cls} SINIFI (${lv.toUpperCase()}) SINAV YERİ LİSTESİ`)}
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                            <thead>
+                                <tr style="background: #e5e7eb;">
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px; width: 35px;">#</th>
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px; width: 70px;">Okul No</th>
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px;">Adı Soyadı</th>
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px; width: 65px;">Sınıfı</th>
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px; width: 60px;">Cinsiyet</th>
+                                    <th style="border: 1px solid #000; padding: 6px 7px; font-size: 11px;">Sınava Gireceği Sınıf ve Sıra No</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ÇIKTI 2: SINIF KAPI & YOKLAMA LİSTESİ (1. Sıra, 2. Sıra, 3. Sıra...)
+        function generatePdfRoomDoorPages(title, dateStr, lvFilter) {
+            const halls = appState.halls.filter(h => lvFilter === 'ALL' || h.level === lvFilter);
+            if (halls.length === 0) {
+                return `<div class="a4-sheet"><p>Henüz sınıf tanımlanmadı.</p></div>`;
+            }
+
+            return halls.map(hall => {
+                const occupantByRow = {};
+                appState.students.forEach(s => {
+                    const asg = appState.assignments[s.id];
+                    if (asg && asg.hallId === hall.id) {
+                        occupantByRow[asg.rowNumber] = s;
+                    }
+                });
+
+                const totalRows = parseInt(hall.rowCount) || 1;
+                let rowsHtml = '';
+                for (let r = 1; r <= totalRows; r++) {
+                    const stu = occupantByRow[r];
+                    rowsHtml += `
+                        <tr>
+                            <td style="border: 1px solid #000; padding: 5px 8px; font-size: 11px; font-weight: 800;">
+                                ${r}. Sıra
+                            </td>
+                            <td style="border: 1px solid #000; padding: 5px 8px; font-size: 11px; font-weight: 700;">
+                                ${stu ? escapeHtml(stu.no) : '-'}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 5px 8px; font-size: 11px; font-weight: 700;">
+                                ${stu ? escapeHtml(stu.name) : 'BOŞ SIRA'}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 5px 8px; font-size: 11px; font-weight: 700;">
+                                ${stu ? escapeHtml(stu.className) : '-'}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 5px 8px; font-size: 11px;">
+                                ${stu ? (stu.gender === 'F' ? 'Kız' : 'Erkek') : '-'}
+                            </td>
+                            <td style="border: 1px solid #000; padding: 5px 8px; width: 120px;"></td>
+                        </tr>
+                    `;
+                }
+
+                const gText = hall.genderRule === 'F' ? 'Kız Sınıfı' : (hall.genderRule === 'M' ? 'Erkek Sınıfı' : 'Karma Sınıf');
+
+                return `
+                    <div class="a4-sheet">
+                        ${buildPrintHeader(title, dateStr, `SINAV SALONU: ${hall.name} (${hall.level} - ${gText})`)}
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                            <thead>
+                                <tr style="background: #e5e7eb;">
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px; width: 85px;">Sıra No</th>
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px; width: 75px;">Okul No</th>
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px;">Öğrenci Adı Soyadı</th>
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px; width: 75px;">Kendi Sınıfı</th>
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px; width: 65px;">Cinsiyet</th>
+                                    <th style="border: 1px solid #000; padding: 6px 8px; font-size: 11px;">İmza</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ÇIKTI 3: SINIF GÖRSEL SIRA ŞEMASI
+        function generatePdfRoomChartPages(title, dateStr, lvFilter) {
+            const halls = appState.halls.filter(h => lvFilter === 'ALL' || h.level === lvFilter);
+            if (halls.length === 0) {
+                return `<div class="a4-sheet"><p>Henüz sınıf tanımlanmadı.</p></div>`;
+            }
+
+            return halls.map(hall => {
+                const occupantByRow = {};
+                appState.students.forEach(s => {
+                    const asg = appState.assignments[s.id];
+                    if (asg && asg.hallId === hall.id) {
+                        occupantByRow[asg.rowNumber] = s;
+                    }
+                });
+
+                const colCount = parseInt(hall.colCount) || 3;
+                const totalRows = parseInt(hall.rowCount) || 1;
+                const rowsPerCol = Math.ceil(totalRows / colCount);
+
+                let colsHtml = '';
+                for (let col = 1; col <= colCount; col++) {
+                    let boxes = '';
+                    for (let r = 1; r <= rowsPerCol; r++) {
+                        const deskNo = (r - 1) * colCount + col;
+                        if (deskNo > totalRows) continue;
+                        const stu = occupantByRow[deskNo];
+
+                        boxes += `
+                            <div style="border: 1.5px solid #000; padding: 6px; margin-bottom: 6px; border-radius: 3px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; border-bottom: 1px solid #999; padding-bottom: 2px; margin-bottom: 3px;">
+                                    <span>${deskNo}. SIRA</span>
+                                    <span>${stu ? escapeHtml(stu.className) : ''}</span>
+                                </div>
+                                ${stu
+                                    ? `<div style="font-size: 11px; font-weight: 700;">${escapeHtml(stu.name)}</div>
+                                       <div style="font-size: 9.5px;">No: ${escapeHtml(stu.no)}</div>`
+                                    : `<div style="font-size: 10px; color: #666; text-align: center; padding: 4px 0;">BOŞ SIRA</div>`
+                                }
+                            </div>
+                        `;
+                    }
+
+                    colsHtml += `
+                        <div style="flex: 1;">
+                            <div style="text-align: center; font-weight: 800; font-size: 11px; border: 1px solid #000; background: #e5e7eb; padding: 4px; margin-bottom: 8px;">
+                                ${col}. GRUP
+                            </div>
+                            ${boxes}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="a4-sheet">
+                        ${buildPrintHeader(title, dateStr, `OTURMA ŞEMASI: ${hall.name} (${hall.level})`)}
+                        <div style="text-align: center; border: 1px solid #000; padding: 5px; font-weight: 800; font-size: 11px; margin-bottom: 10px; background: #f3f4f6;">
+                            YAZI TAHTASI / ÖĞRETMEN MASASI (ÖN TARAF — 1. SIRA ÖNDE)
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            ${colsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function exportToPdfFile() {
+            const el = document.getElementById('pdfPreviewRoot');
+            const btn = document.getElementById('btnDownloadPdf');
+            const oldText = btn.textContent;
+            btn.textContent = 'PDF Hazırlanıyor...';
+
+            const opt = {
+                margin: [4, 4, 4, 4],
+                filename: 'Corlu_AIHL_Kelebek_Oturma_Duzeni.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(el).save().then(() => {
+                btn.textContent = oldText;
+                showNotice('PDF dosyası indirildi.');
+            }).catch(() => {
+                btn.textContent = oldText;
+                showNotice('PDF oluşturulurken hata oluştu, Yazdır butonunu kullanabilirsiniz.');
+            });
+        }
+
+        /********************************************************************
+         * 5. SEKME: CONFIG KAYDET / YÜKLE / ÜSTÜNE YAZ
+         ********************************************************************/
+        function getConfigsMap() {
+            try {
+                const raw = localStorage.getItem(STORAGE_CONFIGS_KEY);
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveConfigsMap(map) {
+            localStorage.setItem(STORAGE_CONFIGS_KEY, JSON.stringify(map));
+        }
+
+        function saveNewConfig() {
+            const inp = document.getElementById('inpNewConfigName');
+            const name = inp.value.trim();
+            if (!name) {
+                showNotice('Lütfen kayıt (config) için bir isim yazın.');
+                return;
+            }
+
+            const map = getConfigsMap();
+            appState.activeConfigName = name;
+            map[name] = {
+                name,
+                updatedAt: new Date().toLocaleString('tr-TR'),
+                state: JSON.parse(JSON.stringify(appState))
+            };
+            saveConfigsMap(map);
+            saveActiveToLocal();
+            inp.value = '';
+            refreshUI();
+            showNotice(`"${name}" kaydedildi.`);
+        }
+
+        function overwriteSelectedConfig() {
+            const sel = document.getElementById('selOverwriteConfig');
+            const targetName = sel ? sel.value : '';
+            if (!targetName) {
+                showNotice('Üstüne yazılacak bir kayıt seçin.');
+                return;
+            }
+            overwriteByName(targetName);
+        }
+
+        function quickOverwriteActiveConfig() {
+            const target = appState.activeConfigName || 'Varsayılan Kayıt';
+            overwriteByName(target);
+        }
+
+        function overwriteByName(name) {
+            const map = getConfigsMap();
+            appState.activeConfigName = name;
+            map[name] = {
+                name,
+                updatedAt: new Date().toLocaleString('tr-TR'),
+                state: JSON.parse(JSON.stringify(appState))
+            };
+            saveConfigsMap(map);
+            saveActiveToLocal();
+            refreshUI();
+            showNotice(`"${name}" kaydının üstüne yazıldı.`);
+        }
+
+        function loadSavedConfig(name) {
+            const map = getConfigsMap();
+            if (!map[name]) return;
+            appState = JSON.parse(JSON.stringify(map[name].state));
+            appState.activeConfigName = name;
+            activeSeatingHallId = appState.halls[0] ? appState.halls[0].id : null;
+            saveActiveToLocal();
+            refreshUI();
+            showNotice(`"${name}" yüklendi.`);
+        }
+
+        function deleteSavedConfig(name) {
+            openConfirmModal('Kaydı Sil', `"${name}" adlı kaydı silmek istediğinize emin misiniz?`, () => {
+                const map = getConfigsMap();
+                delete map[name];
+                saveConfigsMap(map);
+                renderConfigPanel();
+                showNotice(`"${name}" silindi.`);
+            });
+        }
+
+        function resetEverythingEmpty() {
+            openConfirmModal('Sistemi Tamamen Boşalt', 'Tüm sınıfları ve öğrencileri silip sistemi sıfırlamak istediğinize emin misiniz?', () => {
+                appState = {
+                    activeConfigName: '',
+                    examTitle: 'Ortak Sınav Kelebek Oturma Düzeni Listesi',
+                    examDate: '',
+                    halls: [],
+                    students: [],
+                    assignments: {},
+                    unplacedIds: []
+                };
+                saveActiveToLocal();
+                refreshUI();
+                showNotice('Sistem tamamen sıfırlandı (0 Sınıf, 0 Öğrenci).');
+            });
+        }
+
+        function renderConfigPanel() {
+            const map = getConfigsMap();
+            const entries = Object.values(map);
+
+            const sel = document.getElementById('selOverwriteConfig');
+            if (entries.length === 0) {
+                sel.innerHTML = `<option value="">-- Kayıt Yok --</option>`;
+            } else {
+                sel.innerHTML = entries.map(e =>
+                    `<option value="${escapeHtml(e.name)}" ${e.name === appState.activeConfigName ? 'selected' : ''}>${escapeHtml(e.name)}</option>`
+                ).join('');
+            }
+
+            const tbody = document.getElementById('tbodyConfigs');
+            if (entries.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-8 text-gray-500">
+                            Henüz kaydedilmiş bir config bulunmuyor. Sol taraftan yeni kayıt oluşturabilirsiniz.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = entries.map(e => {
+                const hCnt = e.state && e.state.halls ? e.state.halls.length : 0;
+                const sCnt = e.state && e.state.students ? e.state.students.length : 0;
+                const isAct = e.name === appState.activeConfigName;
+
+                return `
+                    <tr>
+                        <td class="font-bold">
+                            ${escapeHtml(e.name)}
+                            ${isAct ? `<span class="ml-1 text-[11px] bg-green-100 text-green-800 border border-green-300 px-1.5 py-0.5 rounded">Aktif</span>` : ''}
+                        </td>
+                        <td class="text-xs text-gray-600">${escapeHtml(e.updatedAt)}</td>
+                        <td class="text-xs">${hCnt} Sınıf, ${sCnt} Öğrenci</td>
+                        <td class="text-right space-x-1">
+                            <button onclick="loadSavedConfig('${escapeJs(e.name)}')" class="px-2.5 py-1 text-xs bg-blue-800 hover:bg-blue-700 text-white rounded font-semibold">
+                                Yükle
+                            </button>
+                            <button onclick="overwriteByName('${escapeJs(e.name)}')" class="px-2.5 py-1 text-xs bg-amber-600 hover:bg-amber-700 text-white rounded font-semibold">
+                                Üstüne Yaz
+                            </button>
+                            <button onclick="deleteSavedConfig('${escapeJs(e.name)}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 rounded">
+                                Sil
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function downloadConfigFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const a = document.createElement('a');
+            const fName = (appState.activeConfigName || 'corlu_aihl_config').replace(/[^a-zA-Z0-9_-]/g, '_');
+            a.setAttribute('href', dataStr);
+            a.setAttribute('download', `${fName}.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showNotice('Config dosyası (.json) indirildi.');
+        }
+
+        function uploadConfigFile(ev) {
+            const file = ev.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && Array.isArray(parsed.halls) && Array.isArray(parsed.students)) {
+                        appState = parsed;
+                        appState.activeConfigName = parsed.activeConfigName || file.name.replace('.json', '');
+                        overwriteByName(appState.activeConfigName);
+                        showNotice('Config dosyası başarıyla yüklendi.');
+                    } else {
+                        showNotice('Geçersiz dosya formatı.');
+                    }
+                } catch (err) {
+                    showNotice('Dosya okunamadı.');
+                }
+            };
+            reader.readAsText(file);
+            ev.target.value = '';
+        }
+
+        /********************************************************************
+         * YARDIMCI FONKSİYONLAR (MODAL & BİLDİRİM)
+         ********************************************************************/
+        let confirmCallback = null;
+        function openConfirmModal(title, text, onYes) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmText').textContent = text;
+            confirmCallback = onYes;
+            const m = document.getElementById('confirmModal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            document.getElementById('btnConfirmYes').onclick = function () {
+                if (confirmCallback) confirmCallback();
+                closeConfirmModal();
+            };
+        }
+
+        function closeConfirmModal() {
+            const m = document.getElementById('confirmModal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            confirmCallback = null;
+        }
+
+        let noticeTimer = null;
+        function showNotice(msg) {
+            const el = document.getElementById('statusNotice');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+            if (noticeTimer) clearTimeout(noticeTimer);
+            noticeTimer = setTimeout(() => {
+                el.classList.add('hidden');
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeJs(str) {
+            return String(str ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        }
+    </script>
+</body>
+</html>
